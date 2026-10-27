@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <title>Student NFC Scanner</title>
+</head>
+<body>
+  <h2>Student Attendance</h2>
+  <button id="scan">Scan Student Card</button>
+  <p id="result">Waiting...</p>
+
+  <script>
+    document.getElementById("scan").onclick =
+      async () => {
+        const result = document.getElementById("result");
+
+        if (!("NDEFReader" in window)) {
+          result.textContent = "Web NFC not supported";
+          return;
+        }
+
+        try {
+          const reader = new NDEFReader();
+          await reader.scan();
+
+          result.textContent = "Tap an NFC card...";
+
+          reader.onreading = (event) => {
+            for (const record of event.message.records) {
+              if (record.recordType === "text") {
+                const text = new TextDecoder(
+                  record.encoding || "utf-8"
+                ).decode(record.data);
+
+                result.textContent = "Student: " + text;
+              }
+            }
+          };
+
+          reader.onreadingerror = () => {
+            result.textContent = "Could not read tag";
+          };
+        } catch (error) {
+          result.textContent = error.message;
+        }
+      };
+  </script>
+</body>
+</html>
